@@ -155,16 +155,17 @@
               </select>
             </div>
             <div class="form-field" id="field-support">
-              <label for="support">Current Support Level</label>
-              <select id="support">
-                <option value="">— Optional —</option>
-                <option>No current support</option>
-                <option>Seeing a GP</option>
-                <option>In therapy</option>
-                <option>On medication</option>
-                <option>Inpatient / Residential</option>
-                <option>Multiple supports</option>
-              </select>
+              <label>Current Support Level <span class="field-hint-inline">(select all that apply)</span></label>
+              <div class="check-grid check-grid-sm" id="support-checks">
+                <div class="check-item"><input type="checkbox" id="sup-none" name="support" value="No current support"><label class="check-label" for="sup-none"><span class="check-box"></span>No current support</label></div>
+                <div class="check-item"><input type="checkbox" id="sup-gp" name="support" value="Seeing a GP"><label class="check-label" for="sup-gp"><span class="check-box"></span>Seeing a GP</label></div>
+                <div class="check-item"><input type="checkbox" id="sup-therapy" name="support" value="In therapy"><label class="check-label" for="sup-therapy"><span class="check-box"></span>In therapy</label></div>
+                <div class="check-item"><input type="checkbox" id="sup-meds" name="support" value="On medication"><label class="check-label" for="sup-meds"><span class="check-box"></span>On medication</label></div>
+                <div class="check-item"><input type="checkbox" id="sup-psych" name="support" value="Seeing a psychiatrist"><label class="check-label" for="sup-psych"><span class="check-box"></span>Seeing a psychiatrist</label></div>
+                <div class="check-item"><input type="checkbox" id="sup-inpatient" name="support" value="Inpatient / Residential"><label class="check-label" for="sup-inpatient"><span class="check-box"></span>Inpatient / Residential</label></div>
+                <div class="check-item"><input type="checkbox" id="sup-peer" name="support" value="Peer support group"><label class="check-label" for="sup-peer"><span class="check-box"></span>Peer support group</label></div>
+                <div class="check-item"><input type="checkbox" id="sup-crisis" name="support" value="Crisis / emergency services"><label class="check-label" for="sup-crisis"><span class="check-box"></span>Crisis / emergency services</label></div>
+              </div>
             </div>
             <div class="form-field" id="field-workStatus">
               <label for="workStatus">Employment / Study Status <span class="req">*</span></label>
@@ -205,6 +206,12 @@
                 <button type="button" class="day-btn" data-day="Sun">Sun</button>
               </div>
               <span class="field-hint">Select all days that apply — your weekly plan will be built around these.</span>
+            </div>
+            <div class="form-field span-2" id="field-startDate">
+              <label>When would you like to start your program? <span class="req">*</span></label>
+              <div class="start-date-picker" id="startDatePicker"></div>
+              <span class="field-hint">Choose any day in the next 7 days that feels right for you.</span>
+              <span class="error-msg" id="startDate-error">Please choose a start date.</span>
             </div>
           </div>
         </div>
@@ -597,6 +604,30 @@
     btn.addEventListener('click', () => btn.classList.toggle('selected'));
   });
 
+  // ─── START DATE PICKER ───────────────────────────────
+  (function buildStartDatePicker() {
+    const container = document.getElementById('startDatePicker');
+    if (!container) return;
+    const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const today = new Date();
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(today);
+      d.setDate(today.getDate() + i);
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'start-date-btn';
+      btn.dataset.date = d.toISOString().slice(0, 10);
+      btn.innerHTML = `<span class="sd-day">${i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : dayNames[d.getDay()]}</span><span class="sd-date">${d.getDate()} ${monthNames[d.getMonth()]}</span>`;
+      btn.addEventListener('click', () => {
+        container.querySelectorAll('.start-date-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        document.getElementById('startDate-error').style.display = 'none';
+      });
+      container.appendChild(btn);
+    }
+  })();
+
   // ─── SCALE BUTTONS ───────────────────────────────────
   function selectScale(btn, groupId) {
     document.querySelectorAll(`#${groupId} .scale-btn`).forEach(b => b.classList.remove('active'));
@@ -628,6 +659,12 @@
         if (msg) msg.style.display = 'none';
       }
     });
+    // Validate start date
+    const startDateSelected = document.querySelector('.start-date-btn.selected');
+    if (!startDateSelected) {
+      document.getElementById('startDate-error').style.display = 'block';
+      ok = false;
+    }
     return ok;
   }
 
@@ -707,9 +744,11 @@
     const crisisBannerEl = document.getElementById('crisis-banner');
     if (crisisBannerEl) crisisBannerEl.style.display = isHighRisk ? 'flex' : 'none';
 
-    // Set date
+    // Set date — use chosen start date
+    const startDateBtn = document.querySelector('.start-date-btn.selected');
+    const startDate = startDateBtn ? new Date(startDateBtn.dataset.date + 'T12:00:00') : new Date();
     const now = new Date();
-    document.getElementById('plan-date-label').textContent = now.toLocaleDateString('en-GB', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+    document.getElementById('plan-date-label').textContent = 'Starting ' + startDate.toLocaleDateString('en-GB', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
 
     // Greeting
     const hour = now.getHours();
@@ -724,7 +763,7 @@
 
     // Certificate
     document.getElementById('cert-name-display').textContent = firstName + (lastName ? ' ' + lastName : '');
-    document.getElementById('cert-date-display').textContent = now.toLocaleDateString('en-GB', { year:'numeric', month:'long', day:'numeric' });
+    document.getElementById('cert-date-display').textContent = startDate.toLocaleDateString('en-GB', { year:'numeric', month:'long', day:'numeric' });
     const certId = 'CC-' + now.getFullYear() + '-' + Math.random().toString(36).substring(2,7).toUpperCase();
     document.getElementById('cert-id-display').textContent = certId;
 
@@ -1074,6 +1113,7 @@
     document.querySelectorAll('input[type="checkbox"], input[type="radio"]').forEach(el => el.checked = false);
     document.querySelectorAll('.scale-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('selected'));
+    document.querySelectorAll('.start-date-btn').forEach(b => b.classList.remove('selected'));
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
