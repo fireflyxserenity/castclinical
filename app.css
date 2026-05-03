@@ -1172,6 +1172,154 @@ body.dark .tag-tech      { background: rgba(80,100,200,.18);  color: #8898E0; }
 .field-error input,
 .field-error select { border-color: var(--red-soft) !important; }
 
+/* ── FOUR-WEEK OVERVIEW ─────────────────────────────── */
+.four-week-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 36px;
+}
+
+.fw-card {
+  background: rgba(255,255,255,.70);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 18px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.fw-card.fw-active {
+  border-color: var(--teal);
+  box-shadow: 0 0 0 1px var(--teal), var(--shadow-sm);
+}
+
+.fw-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fw-num {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--teal);
+  background: rgba(42,156,200,.1);
+  border-radius: 6px;
+  padding: 2px 7px;
+}
+
+.fw-phase {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .8px;
+}
+
+.fw-theme {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--navy);
+  line-height: 1.3;
+}
+
+.fw-desc {
+  font-size: 12px;
+  color: var(--mid);
+  line-height: 1.55;
+  margin: 0;
+  flex: 1;
+}
+
+.fw-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 4px;
+}
+
+.fw-pill {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .4px;
+  color: var(--sage);
+  background: var(--sage-pale);
+  border-radius: 20px;
+  padding: 3px 9px;
+}
+
+body.dark .fw-card {
+  background: rgba(17,30,46,.65);
+  border-color: rgba(255,255,255,.08);
+}
+
+body.dark .fw-card.fw-active {
+  border-color: rgba(42,156,200,.5);
+  box-shadow: 0 0 0 1px rgba(42,156,200,.5);
+}
+
+/* ── CRISIS BANNER ──────────────────────────────────── */
+.crisis-banner {
+  display: none;
+  align-items: flex-start;
+  gap: 14px;
+  background: rgba(224,117,117,.08);
+  border: 1px solid rgba(224,117,117,.35);
+  border-radius: var(--radius-md);
+  padding: 18px 20px;
+  margin-bottom: 28px;
+}
+
+.crisis-banner-icon {
+  font-size: 22px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.crisis-banner-body {
+  font-size: 13.5px;
+  color: var(--navy);
+  line-height: 1.65;
+}
+
+.crisis-banner-body strong {
+  display: block;
+  margin-bottom: 4px;
+  color: #c0392b;
+  font-size: 14px;
+}
+
+.crisis-lines {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 20px;
+  margin-top: 10px;
+}
+
+.crisis-lines span {
+  font-size: 13px;
+  color: var(--mid);
+}
+
+.crisis-lines a {
+  color: var(--teal);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+body.dark .crisis-banner {
+  background: rgba(224,117,117,.12);
+  border-color: rgba(224,117,117,.30);
+}
+
+body.dark .crisis-banner-body strong { color: #e07575; }
+
 /* ── RESPONSIVE ────────────────────────────────────── */
 @media (max-width: 640px) {
   header { padding: 0 20px; }
@@ -1186,6 +1334,7 @@ body.dark .tag-tech      { background: rgba(80,100,200,.18);  color: #8898E0; }
   .plan-hero { padding: 28px 20px 24px; }
   .plan-body { padding: 20px; }
   .time-col { width: 68px; }
+  .four-week-grid { grid-template-columns: 1fr 1fr; }
 }
 
 @media print {

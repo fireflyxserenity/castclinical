@@ -4,12 +4,19 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CAST Clinical – 4-Week Mental Health & Wellbeing Program</title>
+  <meta name="description" content="Complete your CAST Clinical triage assessment and receive a personalised 4-week mental health and wellbeing program — grounded in evidence-based practice." />
+  <meta property="og:title" content="CAST Clinical – Start Your Wellbeing Assessment" />
+  <meta property="og:description" content="A 5-minute check-in generates a personalised 4-week mental health plan matched to your conditions, schedule and goals." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://fireflyxserenity.github.io/castclinical/app.html" />
+  <meta name="robots" content="noindex" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="app.css" />
 </head>
 <body>
+<script>if(localStorage.getItem('cast-theme')==='dark')document.body.classList.add('dark');</script>
 
 <!-- Background FX layer -->
 <div class="bg-layer" aria-hidden="true">
@@ -486,6 +493,21 @@
     </div>
     <div class="plan-body">
 
+      <!-- Crisis support banner (shown dynamically for high-risk responses) -->
+      <div class="crisis-banner" id="crisis-banner">
+        <div class="crisis-banner-icon">🚨</div>
+        <div class="crisis-banner-body">
+          <strong>Your responses suggest you may benefit from immediate professional support.</strong>
+          This plan is a self-guided resource and works best alongside — not instead of — clinical care. Please reach out to a clinician before starting.
+          <div class="crisis-lines">
+            <span>🇦🇺 Lifeline: <a href="tel:131114">13 11 14</a></span>
+            <span>🇦🇺 Mental Health Line: <a href="tel:1800011511">1800 011 511</a></span>
+            <span>🇺🇸 988 Lifeline: <a href="tel:988">988</a></span>
+            <span>🇬🇧 Samaritans: <a href="tel:116123">116 123</a></span>
+          </div>
+        </div>
+      </div>
+
       <!-- Diagnoses summary -->
       <div class="section-title">Your Focus Areas</div>
       <div class="plan-diagnoses" id="plan-diagnoses"></div>
@@ -516,9 +538,9 @@
       <div class="certificate-wrap" id="plan-certificate">
         <div class="certificate-inner">
           <div class="cert-logo">CAST Clinical</div>
-          <div class="cert-eyebrow">Certificate of Completion</div>
+          <div class="cert-eyebrow">4-Week Wellbeing Program</div>
           <h2 class="cert-name" id="cert-name-display"></h2>
-          <p class="cert-body">has successfully completed the CAST Clinical 4-Week Wellbeing Program — a personalised, evidence-based treatment plan addressing the focus areas identified at the time of triage.</p>
+          <p class="cert-body">has received a personalised CAST Clinical 4-Week Wellbeing Plan — an evidence-based program built around their self-reported focus areas. Present this document to your treating clinician upon completing the program.</p>
           <div class="cert-meta">
             <div class="cert-meta-item"><span class="cert-meta-label">Date Issued</span><span class="cert-meta-value" id="cert-date-display"></span></div>
             <div class="cert-meta-divider"></div>
@@ -535,7 +557,7 @@
         <div class="parenting-teaser-icon">👶</div>
         <div>
           <div class="parenting-teaser-title">Parenting Certificate — Coming Soon</div>
-          <p class="parenting-teaser-body">On completion of your treatment plan, you may be eligible to continue with a <strong>CAST Clinical Parenting Certificate</strong> — a structured parenting skills program. This pathway is currently <strong>pending approval by the Province of Ontario</strong> and will be available once authorised. We will notify enrolled participants when it launches.</p>
+          <p class="parenting-teaser-body">On completion of your treatment plan, you may be eligible to continue with a <strong>CAST Clinical Parenting Certificate</strong> — a structured parenting skills program. This pathway is currently in development and will be available soon. Enrolled participants will be notified when it launches.</p>
         </div>
       </div>
 
@@ -545,6 +567,10 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
           Print / Save as PDF
         </button>
+        <a class="btn btn-secondary" id="email-plan-btn" href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          Email to myself
+        </a>
         <button class="btn btn-secondary" onclick="startOver()">Start a New Assessment</button>
       </div>
     </div>
@@ -667,6 +693,19 @@
     const hasAnger     = mentalChecks.some(m => m.includes('Anger') || m.includes('Explosive') || m.includes('Impulse Control'));
     const highAnx      = +anxSev >= 4;
     const highMood     = +moodSev >= 4;
+
+    // ── CRISIS DETECTION ────────────────────────────
+    const highRiskDx = mentalChecks.some(m =>
+      m.includes('Schizophrenia') || m.includes('Schizoaffective') ||
+      m.includes('BPD') || m.includes('Borderline') ||
+      (m.includes('PTSD') && highMood)
+    );
+    const highRiskSub = addictionChecks.some(a =>
+      a.includes('Opioid') || a.includes('Benzodiazepine') || a.includes('Polysubstance')
+    ) && recoveryStatus === 'Currently using';
+    const isHighRisk = (highRiskDx && highMood && highAnx) || highRiskSub;
+    const crisisBannerEl = document.getElementById('crisis-banner');
+    if (crisisBannerEl) crisisBannerEl.style.display = isHighRisk ? 'flex' : 'none';
 
     // Set date
     const now = new Date();
@@ -883,6 +922,41 @@
       <div class="summary-stat"><span class="summary-stat-value">${workStatus ? document.getElementById('workStatus').options[document.getElementById('workStatus').selectedIndex].text.split('(')[0].trim() : '—'}</span><span class="summary-stat-label">Work status</span></div>
     `;
 
+    // 4-week program overview
+    const fwEl = document.getElementById('four-week-grid');
+    const weekPlans = [
+      {
+        num: '01', phase: 'Week 1', theme: 'Foundation & Awareness',
+        desc: 'Establish your daily routine, begin mood tracking and build your baseline coping toolkit.',
+        pills: ['Morning Routine', 'Mindfulness', 'Sleep Hygiene'],
+      },
+      {
+        num: '02', phase: 'Week 2', theme: 'Skill Building',
+        desc: `Deepen ${ hasOCD ? 'ERP practice' : hasTrauma || hasBPD ? 'DBT emotion regulation skills' : hasMood ? 'behavioural activation' : hasAnxiety ? 'cognitive restructuring' : 'therapeutic skill practice' } and extend your daily structure.`,
+        pills: ['Therapeutic Skills', 'Movement', hasAddiction ? 'Recovery Practice' : 'Guided Media'],
+      },
+      {
+        num: '03', phase: 'Week 3', theme: 'Deepening Practice',
+        desc: `Apply skills in real-world situations${ vrReady ? ', incorporate VR therapy sessions' : '' } and begin tracking measurable progress week-on-week.`,
+        pills: [vrReady ? 'VR Therapy' : 'Digital Therapy', 'Progress Review', hasAnger ? 'Anger Management' : 'Social Connection'],
+      },
+      {
+        num: '04', phase: 'Week 4', theme: 'Integration & Maintenance',
+        desc: 'Consolidate gains, design a personalised long-term self-care plan and connect with ongoing support services.',
+        pills: ['Long-term Planning', 'Review & Reflect', 'Ongoing Support'],
+      },
+    ];
+    fwEl.innerHTML = weekPlans.map((w, i) => `
+      <div class="fw-card${ i === 0 ? ' fw-active' : '' }">
+        <div class="fw-header">
+          <span class="fw-num">${w.num}</span>
+          <span class="fw-phase">${w.phase}</span>
+        </div>
+        <div class="fw-theme">${w.theme}</div>
+        <p class="fw-desc">${w.desc}</p>
+        <div class="fw-pills">${w.pills.map(p => `<span class="fw-pill">${p}</span>`).join('')}</div>
+      </div>`).join('');
+
     // Render weekly grid
     const tlEl = document.getElementById('plan-timeline');
     tlEl.innerHTML = '';
@@ -965,6 +1039,18 @@
           <p>${r.text}</p>
         </div>`;
     });
+
+    // Wire up email-to-myself button
+    const emailPlanBtn = document.getElementById('email-plan-btn');
+    if (emailPlanBtn) {
+      const emailAddr = document.getElementById('email').value.trim();
+      const focusList = [...mentalChecks, ...addictionChecks].join(', ') || 'General Wellbeing';
+      const emailSubject = encodeURIComponent('Your CAST Clinical 4-Week Wellbeing Plan');
+      const emailBody = encodeURIComponent(
+        `Hi ${firstName},\n\nYour personalised 4-week wellbeing plan is ready.\n\nFocus areas: ${focusList}\nProgram days: ${daysLabel}\nDaily time: ${timeLabel}\n\nView your full plan:\nhttps://fireflyxserenity.github.io/castclinical/app.html\n\nThis is a self-guided support resource — please also discuss your focus areas with your treating clinician.\n\nIn a crisis? Call 13 11 14 (AU) | 988 (US) | 116 123 (UK)\n\n— CAST Clinical`
+      );
+      emailPlanBtn.href = `mailto:${emailAddr}?subject=${emailSubject}&body=${emailBody}`;
+    }
 
     // Show plan, hide form
     document.getElementById('form-section').style.display = 'none';
