@@ -30,8 +30,19 @@
 <header>
   <a href="index.html" class="logo" style="text-decoration:none;">
     <div class="logo-mark">
-      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402z"/>
+      <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" fill="none">
+        <defs>
+          <linearGradient id="lm-grad-a" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#2A9CC8"/>
+            <stop offset="100%" stop-color="#0ECFCF"/>
+          </linearGradient>
+        </defs>
+        <!-- Outer diamond -->
+        <rect x="4" y="4" width="32" height="32" rx="7" ry="7" transform="rotate(45 20 20)" fill="url(#lm-grad-a)"/>
+        <!-- Inner diamond ring -->
+        <rect x="7.5" y="7.5" width="25" height="25" rx="5.5" ry="5.5" transform="rotate(45 20 20)" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.2"/>
+        <!-- C letterform -->
+        <path d="M24.5 13.5 A8 8 0 1 0 24.5 26.5" stroke="white" stroke-width="3" stroke-linecap="round" fill="none"/>
       </svg>
     </div>
     <div class="logo-text">
